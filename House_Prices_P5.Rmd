@@ -1,0 +1,213 @@
+---
+title: "Housing_prices_P5"
+output: html_document
+date: "2026-11-12"
+---
+```{r}
+library(dplyr)
+library(ggplot2)
+library(glmnet)
+library(car)
+library(corrplot)
+library(ggpubr)
+```
+
+ALT INKLUDERET
+```{r}
+#Klargør data og behold både Pris_Salg og Log_Pris_Salg
+homedata1 <- homedata %>%
+  mutate(Log_Pris_Salg = log(Pris_Salg)) %>%
+  select(RegionNavn, KommuneNavn, EjdType, Pris_Salg, Log_Pris_Salg, Areal_Bolig, 
+         Areal_GarageCarport, Areal_Grund, Areal_Kaelder, Ejd_Altan, Ejd_AntalPlan, 
+         Ejd_AntalRum, Ejd_AntalSoveVaerelser, Ejd_AntalToiletter, Ejd_Opfoerelsesaar, 
+         Ejd_Ombygningsaar, Salgsaar, Dist_skole, Dist_raadhus, Afstemningsomraade, Sogn, corona)
+
+# Korrekt konvertering af faktorer direkte på homedata1
+homedata1$RegionNavn <- as.factor(homedata1$RegionNavn)
+homedata1$KommuneNavn <- as.factor(homedata1$KommuneNavn)
+homedata1$EjdType <- as.factor(homedata1$EjdType)
+homedata1$Afstemningsomraade <- as.factor(homedata1$Afstemningsomraade)
+homedata1$Sogn <-  as.factor(homedata1$Sogn)
+
+# Uden logaritme (Husk at ekskludere Log_Pris_Salg fra prediktorerne)
+model_pris <- lm(Pris_Salg ~ . - Log_Pris_Salg, data = homedata1)
+
+# Med logaritme (Husk at ekskludere den oprindelige Pris_Salg)
+model_log <- lm(Log_Pris_Salg ~ . - Pris_Salg, data = homedata1)
+
+
+# Plot 1: Uden log
+plot(fitted(model_pris), resid(model_pris), 
+     xlab = "Fitted Values (Price)", 
+     ylab = "Residuals", 
+     main = "Normal Price")
+abline(h = 0, col = "red", lty = 2)
+
+# Plot 2: Med log 
+plot(fitted(model_log), resid(model_log), 
+     xlab = "Fitted Values (Log_price)", 
+     ylab = "Residuals", 
+     main = "Log Price")
+abline(h = 0, col = "red", lty = 2)
+
+```
+
+UDEN SOGN
+```{r}
+#Klargør data og behold både Pris_Salg og Log_Pris_Salg
+homedata5 <- homedata %>%
+  mutate(Log_Pris_Salg = log(Pris_Salg)) %>%
+  select(RegionNavn, KommuneNavn, EjdType, Pris_Salg, Log_Pris_Salg, Areal_Bolig, 
+         Areal_GarageCarport, Areal_Grund, Areal_Kaelder, Ejd_Altan, Ejd_AntalPlan, 
+         Ejd_AntalRum, Ejd_AntalSoveVaerelser, Ejd_AntalToiletter, Ejd_Opfoerelsesaar, 
+         Ejd_Ombygningsaar, Salgsaar, Dist_skole, Dist_raadhus, Afstemningsomraade, corona)
+
+# Korrekt konvertering af faktorer direkte på homedata1
+homedata5$RegionNavn <- as.factor(homedata5$RegionNavn)
+homedata5$KommuneNavn <- as.factor(homedata5$KommuneNavn)
+homedata5$EjdType <- as.factor(homedata5$EjdType)
+homedata5$Afstemningsomraade <- as.factor(homedata5$Afstemningsomraade)
+
+
+# Med logaritme (Husk at ekskludere den oprindelige Pris_Salg)
+model_log5 <- lm(Log_Pris_Salg ~ . - Pris_Salg, data = homedata5)
+
+vif(model_log5)
+```
+
+
+
+
+KUN AALBORG
+```{r}
+#Klargør data og behold både Pris_Salg og Log_Pris_Salg
+homedata_aalborg <- homedata %>%
+  filter(KommuneNavn == "Aalborg")
+
+homedata3 <- homedata_aalborg %>%
+  mutate(Log_Pris_Salg = log(Pris_Salg)) %>%
+  select(EjdType, Pris_Salg, Log_Pris_Salg, Areal_Bolig, 
+         Areal_GarageCarport, Areal_Grund, Areal_Kaelder, Ejd_Altan, Ejd_AntalPlan, 
+         Ejd_AntalRum, Ejd_AntalSoveVaerelser, Ejd_AntalToiletter, Ejd_Opfoerelsesaar, 
+         Ejd_Ombygningsaar, Salgsaar, Dist_skole, Dist_raadhus, Afstemningsomraade, corona)
+
+# Korrekt konvertering af faktorer direkte på homedata1
+homedata3$EjdType <- as.factor(homedata3$EjdType)
+homedata3$Afstemningsomraade <- as.factor(homedata3$Afstemningsomraade)
+
+homedata3_clean <- na.omit(homedata3)
+
+# Uden logaritme (Husk at ekskludere Log_Pris_Salg fra prediktorerne)
+model_pris3 <- lm(Pris_Salg ~ . - Log_Pris_Salg, data = homedata3_clean)
+
+# Med logaritme (Husk at ekskludere den oprindelige Pris_Salg)
+model_log3 <- lm(Log_Pris_Salg ~ . - Pris_Salg, data = homedata3_clean)
+
+
+# Plot 1: Uden log
+plot(fitted(model_pris3), resid(model_pris3), 
+     xlab = "Fitted Values (Price)", 
+     ylab = "Residuals", 
+     main = "Normal Price")
+abline(h = 0, col = "red", lty = 2)
+
+# Plot 2: Med log 
+plot(fitted(model_log3), resid(model_log3), 
+     xlab = "Fitted Values (Log_price)", 
+     ylab = "Residuals", 
+     main = "Log Price")
+abline(h = 0, col = "red", lty = 2)
+
+```
+
+
+
+```{r}
+vif(model_log3)
+```
+
+
+VIF Graf
+```{r}
+# 1. Udtræk VIF/GVIF fra modellen
+vif_res <- vif(model_log3)
+
+# 2. Konverter til data.frame (håndterer automatisk matrix vs. vektor)
+if (is.matrix(vif_res)) {
+  vif.df <- data.frame(
+    predictor = rownames(vif_res),
+    VIF = vif_res[, "GVIF^(1/(2*Df))"]
+  )
+} else {
+  vif.df <- data.frame(
+    predictor = names(vif_res),
+    VIF = as.numeric(vif_res)
+  )
+}
+
+# 3. Generer plottet
+ggbarplot(vif.df, x = "predictor", y = "VIF", fill = "#3a86d4",
+          sort.val = "desc", rotate = TRUE, xlab = "", 
+          ylab = "GVIF^(1/(2*Df))") + # Brug almindelig tekst her
+  geom_hline(yintercept = sqrt(5), linetype = "dashed", color = "red", linewidth = 0.8) +
+  theme_minimal()
+```
+
+```{r}
+# 1. Udtræk VIF/GVIF fra modellen
+vif_res <- vif(model_log3)
+
+# 2. Konverter til data.frame
+if (is.matrix(vif_res)) {
+  vif.df <- data.frame(
+    predictor = rownames(vif_res),
+    VIF = vif_res[, "GVIF^(1/(2*Df))"],
+    Df = vif_res[, "Df"]
+  )
+} else {
+  vif.df <- data.frame(
+    predictor = names(vif_res),
+    VIF = as.numeric(vif_res),
+    Df = 1
+  )
+}
+
+# 3. Beregn den korrigerede grænseværdi
+vif.df$threshold <- 5^(1/(2*vif.df$Df))
+
+# 4. Generer plottet
+ggbarplot(vif.df, x = "predictor", y = "VIF",
+          fill = "#3a86d4",
+          sort.val = "desc",
+          rotate = TRUE,
+          xlab = "",
+          ylab = "Adjusted GVIF") +
+  geom_point(aes(y = threshold), color = "red", size = 3) +
+  theme_minimal()
+```
+
+Studentized Residuals vs fitted
+```{r}
+plot(fitted(model_log3), rstudent(model_log3),
+     main = "Studentized Residuals vs Fitted",
+     xlab = "Fitted Values",
+     ylab = "Studentized Residuals")
+
+#abline(h = 0, lty = 2)
+abline(h = c(-2, 2), col = "grey50", lty = 2)
+```
+QQ-Plot for fejlled
+```{r}
+# Beregn residualerne
+residuals <- residuals(model_log3)
+
+# Generer Q-Q plot
+qqnorm(residuals,
+       main = "Normal Q-Q Plot of Residuals",
+       xlab = "Theoretical Quantiles",
+       ylab = "Sample Quantiles")
+
+qqline(residuals, col = "grey50", lwd = 2)
+```
+
+
